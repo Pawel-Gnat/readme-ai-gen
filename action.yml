@@ -1,0 +1,15 @@
+name: AI Readme Generator
+description: Generate or update Readme file with AI
+
+inputs:
+  GOOGLE_API_KEY:
+    description: 'Google AI Studio API Key'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run action
+      run: node ${GITHUB_ACTION_PATH}/dist/use-ai-readme-generator.js
+      shell: bash
+      env:
+        GOOGLE_API_KEY: ${{ inputs.GOOGLE_API_KEY }}
