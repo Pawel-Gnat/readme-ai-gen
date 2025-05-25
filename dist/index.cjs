@@ -66191,17 +66191,11 @@ var require_main = __commonJS({ "node_modules/dotenv/lib/main.js"(exports, modul
 //#endregion
 //#region src/helpers.js
 /**
-
 * Recursively finds files in a directory matching allowed extensions, excluding specified directories.
-
 * @param {string} dir - The starting directory.
-
 * @param {Set<string>} allowedExtensions - Set of allowed file extensions.
-
 * @param {Set<string>} excludedDirs - Set of directory names to exclude.
-
 * @returns {Promise<string[]>} - List of matching file paths.
-
 */
 async function findFilesRecursive(dir, allowedExtensions, excludedDirs) {
 	let filesFound = [];
@@ -66232,7 +66226,8 @@ async function main() {
 		console.error("GOOGLE_API_KEY is required.");
 		process.exit(1);
 	}
-	const readmePath = path.default.join(__dirname, "..", "README.md");
+	const repoRoot = process.env.GITHUB_WORKSPACE;
+	const readmePath = path.default.join(repoRoot, "README.md");
 	let currentContent = "";
 	try {
 		currentContent = await fs_promises.readFile(readmePath, "utf8");
@@ -66252,7 +66247,6 @@ async function main() {
 		".git",
 		"dist"
 	]);
-	const repoRoot = path.default.join(__dirname, "..");
 	const filesFound = await findFilesRecursive(repoRoot, allowedExtensions, excludedDirs);
 	const relativeFiles = filesFound.map((filePath) => path.default.relative(repoRoot, filePath));
 	const filesListStr = relativeFiles.join("\n");
@@ -66298,8 +66292,10 @@ ${currentContent}
 		await fs_promises.writeFile(readmePath, updatedContent, "utf8");
 		console.log("README.md has been successfully updated by script.");
 	} catch (err) {
-		console.error("Error writing updated README.md:", err);
-		process.exit(1);
+		if (err.code !== "ENOENT") {
+			console.error("Error reading README.md:", err);
+			process.exit(1);
+		}
 	}
 }
 main().catch((err) => {
