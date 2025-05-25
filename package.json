@@ -2,10 +2,10 @@
 	"name": "readme-ai-gen",
 	"version": "1.0.0",
 	"description": "AI Readme generator - composite action",
-	"main": "dist/use-ai-readme-generator.js",
+	"type": "module",
+	"main": "dist/index.cjs",
 	"scripts": {
-		"start": "node dist/use-ai-readme-generator.js",
-		"build": "npx rolldown src/use-ai-readme-generator.js --file dist/use-ai-readme-generator.js"
+		"build": "npx rolldown -c rolldown.config.js"
 	},
 	"keywords": [
 		"ai",
@@ -18,9 +18,10 @@
 	"author": "pawel-gnat",
 	"license": "ISC",
 	"devDependencies": {
-		"dotenv": "^16.5.0"
+		"rolldown": "^1.0.0-beta.9"
 	},
 	"dependencies": {
-		"@google/genai": "^1.0.1"
+		"@google/genai": "^1.0.1",
+		"dotenv": "^16.5.0"
 	}
 }

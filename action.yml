@@ -4,12 +4,32 @@ description: Generate or update Readme file with AI
 inputs:
   GOOGLE_API_KEY:
     description: 'Google AI Studio API Key'
+    required: true
+  FILE_EXTENSIONS:
+    description: 'Comma-separated list of file extensions to process (e.g., .js,.jsx)'
+    required: false
+    default: '.js'
+  EXCLUDED_DIRS:
+    description: 'Comma-separated list of directories to exclude (e.g., node_modules,.git)'
+    required: false
+    default: 'node_modules,.git,dist'
 
 runs:
   using: 'composite'
   steps:
-    - name: Run action
-      run: node ${GITHUB_ACTION_PATH}/dist/use-ai-readme-generator.js
+    - name: Scan files, update README.md
+      id: ai-readme-update
       shell: bash
+      run: node ${GITHUB_ACTION_PATH}/dist/index.cjs
       env:
         GOOGLE_API_KEY: ${{ inputs.GOOGLE_API_KEY }}
+        FILE_EXTENSIONS: ${{ inputs.FILE_EXTENSIONS }}
+        EXCLUDED_DIRS: ${{ inputs.EXCLUDED_DIRS }}
+
+outputs:
+  files-updated-count:
+    description: 'The number of files that had their README updated.'
+    value: ${{ steps.ai-readme-update.outputs.files-updated-count }}
+  updated-files-list:
+    description: 'A comma-separated list of files that were updated.'
+    value: ${{ steps.ai-readme-update.outputs.updated-files-list }}
