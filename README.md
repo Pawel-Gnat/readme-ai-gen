@@ -30,7 +30,7 @@ The action analyzes your project's codebase to create comprehensive documentatio
 
 Below is an example workflow that uses this action to update or generate the README file:
 
-````yaml
+```yaml
 name: Update README
 
 on:
@@ -60,29 +60,21 @@ jobs:
         with:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
 
-      - name: Create Pull Request if changes were made
-        # Only run this step if the previous step reported file updates
-        if: steps.ai-readme-update.outputs.files-updated-count > 0
+      - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }} # Or a PAT if you prefer
-          commit-message: 'chore: Update JSDocs with AI Assistant'
-          committer: GitHub <noreply@github.com> # Optional: Customize committer
-          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com> # Optional: Customize author
-          signoff: false # Optional: Whether to signoff commits
-          branch: chore/ai-readme-update # Branch name for the PR
-          delete-branch: true # Automatically delete branch after merging
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: Update README with AI Assistant'
+          committer: GitHub Action <noreply@github.com>
+          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
+          signoff: false
+          branch: chore/ai-readme-update
+          delete-branch: true
           title: 'AI Readme Update'
           body: |
-            Automated Readme updates by the AI assistant.
-
-            **Files Updated (${{ steps.ai-readme-update.outputs.files-updated-count }}):**
-            ```
-            ${{ steps.ai-readme-update.outputs.updated-files-list }}
-            ```
-          labels: |
-            documentation
-````
+            Automated README updates by the AI assistant.
+          labels: documentation
+```
 
 **Setup:**
 

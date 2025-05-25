@@ -25,11 +25,3 @@ runs:
         GOOGLE_API_KEY: ${{ inputs.GOOGLE_API_KEY }}
         FILE_EXTENSIONS: ${{ inputs.FILE_EXTENSIONS }}
         EXCLUDED_DIRS: ${{ inputs.EXCLUDED_DIRS }}
-
-outputs:
-  files-updated-count:
-    description: 'The number of files that had their README updated.'
-    value: ${{ steps.ai-readme-update.outputs.files-updated-count }}
-  updated-files-list:
-    description: 'A comma-separated list of files that were updated.'
-    value: ${{ steps.ai-readme-update.outputs.updated-files-list }}
