@@ -66191,11 +66191,17 @@ var require_main = __commonJS({ "node_modules/dotenv/lib/main.js"(exports, modul
 //#endregion
 //#region src/helpers.js
 /**
+
 * Recursively finds files in a directory matching allowed extensions, excluding specified directories.
+
 * @param {string} dir - The starting directory.
+
 * @param {Set<string>} allowedExtensions - Set of allowed file extensions.
+
 * @param {Set<string>} excludedDirs - Set of directory names to exclude.
+
 * @returns {Promise<string[]>} - List of matching file paths.
+
 */
 async function findFilesRecursive(dir, allowedExtensions, excludedDirs) {
 	let filesFound = [];
@@ -66252,26 +66258,22 @@ async function main() {
 	const filesListStr = relativeFiles.join("\n");
 	const ai = new GoogleGenAI({ apiKey: googleApiKey });
 	const prompt = `
-You are an experienced documentation writer and GitHub Actions expert.
-Your task is to update the project's README file in Markdown format. If a README does not exist, create it from scratch using the structured format outlined below. 
+	You are an experienced developer tasked to write documentation for a project.
+	Your task is to update the project's README file using raw Markdown syntax (do not wrap it in triple backticks or add "markdown" language specifier). If a README does not exist, create it from scratch using the structured format outlined below. 
 
-The README should include the following sections with appropriate details drawn from the project:
-  • Tech stack
-  • Getting started
-  • Setup
-  • Running the application
+	The README should include the following sections with appropriate details drawn from the project:
+  	• Tech stack
+  	• Getting started
+  	• Setup
+  	• Running the application
 
-Additional requirements:
- - Include a proper heading and an overview of the project.
- - Additionally, include a section that lists key repository files (by relative path):
-${filesListStr}
+	Additional requirements:
+	• Include a proper heading and an overview of the project.
+	• Additionally, include a section that lists key repository files (by relative path): ${filesListStr}
+	• If there is existing README content, preserve the parts below the updated sections.
 
-If there is existing README content, preserve the parts below the updated sections.
-
-Current README content (if any):
-${currentContent}
-`;
-	console.log("Generating updated README content via AI (v2)...");
+	Current README content (if any): ${currentContent}`;
+	console.log("Generating updated README content via AI...");
 	let response;
 	try {
 		response = await ai.models.generateContent({

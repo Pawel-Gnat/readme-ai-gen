@@ -13,8 +13,11 @@ async function main() {
 		process.exit(1)
 	}
 
+	// Assume repository root is one level up from src
+	const repoRoot = process.env.GITHUB_WORKSPACE
+
 	// Assume README.md is located in the repository root (one level up from src)
-	const readmePath = path.join(__dirname, '..', 'README.md')
+	const readmePath = path.join(repoRoot, 'README.md')
 
 	let currentContent = ''
 	try {
@@ -28,8 +31,6 @@ async function main() {
 	const allowedExtensions = new Set(['.js', '.jsx', '.ts', '.tsx', '.md'])
 	const excludedDirs = new Set(['node_modules', '.git', 'dist'])
 
-	// Assume repository root is one level up from src
-	const repoRoot = path.join(__dirname, '..')
 	const filesFound = await findFilesRecursive(repoRoot, allowedExtensions, excludedDirs)
 	const relativeFiles = filesFound.map(filePath => path.relative(repoRoot, filePath))
 	const filesListStr = relativeFiles.join('\n')
@@ -37,7 +38,7 @@ async function main() {
 	// Prepare the prompt for AI to update README.md
 	const ai = new GoogleGenAI({ apiKey: googleApiKey })
 	const prompt = `
-	You are an experienced documentation writer and GitHub Actions expert.
+	You are an experienced developer tasked to write documentation for a project.
 	Your task is to update the project's README file using raw Markdown syntax (do not wrap it in triple backticks or add "markdown" language specifier). If a README does not exist, create it from scratch using the structured format outlined below. 
 
 	The README should include the following sections with appropriate details drawn from the project:
@@ -78,8 +79,10 @@ async function main() {
 			await fs.writeFile(readmePath, updatedContent, 'utf8')
 			console.log('README.md has been successfully updated by script.')
 		} catch (err) {
-			console.error('Error writing updated README.md:', err)
-			process.exit(1)
+			if (err.code !== 'ENOENT') {
+				console.error('Error reading README.md:', err)
+				process.exit(1)
+			}
 		}
 	}
 }
