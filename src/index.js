@@ -25,7 +25,7 @@ async function main() {
 	const filesListStr = relativeFiles.join('\n')
 	const packageJson = await getPackageJson(repoRoot)
 	const currentReadmeContent = await getReadmeContent(repoRoot)
-	const shortCodeSnippets = await getSnippets(relativeFiles)
+	const shortCodeSnippets = await getSnippets(relativeFiles, repoRoot)
 
 	// Prepare the prompt for AI to update README.md
 	const ai = new GoogleGenAI({ apiKey: googleApiKey })

@@ -66230,8 +66230,8 @@ async function findFilesRecursive(dir, allowedExtensions, excludedDirs) {
 * @returns {Promise<string>} - The content of README.md file.
 
 */
-async function getReadmeContent(repoRoot$1) {
-	const readmePath$1 = path.default.join(repoRoot$1, "README.md");
+async function getReadmeContent(repoRoot) {
+	const readmePath$1 = path.default.join(repoRoot, "README.md");
 	let currentContent = "";
 	try {
 		currentContent = await fs_promises.readFile(readmePath$1, "utf8");
@@ -66255,8 +66255,8 @@ async function getReadmeContent(repoRoot$1) {
 * @returns {Promise<string>} - The content of package.json file.
 
 */
-async function getPackageJson(repoRoot$1) {
-	const packageJsonPath = path.default.join(repoRoot$1, "package.json");
+async function getPackageJson(repoRoot) {
+	const packageJsonPath = path.default.join(repoRoot, "package.json");
 	try {
 		const packageJsonContent = await fs_promises.readFile(packageJsonPath, "utf8");
 		return packageJsonContent;
@@ -66271,12 +66271,14 @@ async function getPackageJson(repoRoot$1) {
 
 * @param {string[]} filePaths - The paths of the files to read.
 
+* @param {string} repoRoot - The root directory of the repository.
+
 * @param {number} maxLines - The maximum number of lines to read from each file.
 
 * @returns {Promise<{path: string, snippet: string}[]}> - The snippets.
 
 */
-async function getSnippets(filePaths, maxLines = 20) {
+async function getSnippets(filePaths, repoRoot, maxLines = 20) {
 	const snippets = [];
 	for (const p of filePaths.slice(0, 20)) {
 		const content = await fs_promises.readFile(p, "utf8");
@@ -66299,7 +66301,7 @@ async function main() {
 		console.error("GOOGLE_API_KEY is required.");
 		process.exit(1);
 	}
-	const repoRoot$1 = process.env.GITHUB_WORKSPACE;
+	const repoRoot = process.env.GITHUB_WORKSPACE;
 	const allowedExtensions = new Set([
 		".js",
 		".jsx",
@@ -66312,12 +66314,12 @@ async function main() {
 		".git",
 		"dist"
 	]);
-	const filesFound = await findFilesRecursive(repoRoot$1, allowedExtensions, excludedDirs);
-	const relativeFiles = filesFound.map((filePath) => path.default.relative(repoRoot$1, filePath));
+	const filesFound = await findFilesRecursive(repoRoot, allowedExtensions, excludedDirs);
+	const relativeFiles = filesFound.map((filePath) => path.default.relative(repoRoot, filePath));
 	const filesListStr = relativeFiles.join("\n");
-	const packageJson$1 = await getPackageJson(repoRoot$1);
-	const currentReadmeContent = await getReadmeContent(repoRoot$1);
-	const shortCodeSnippets = await getSnippets(relativeFiles);
+	const packageJson$1 = await getPackageJson(repoRoot);
+	const currentReadmeContent = await getReadmeContent(repoRoot);
+	const shortCodeSnippets = await getSnippets(relativeFiles, repoRoot);
 	const ai = new GoogleGenAI({ apiKey: googleApiKey });
 	const prompt = `
 	### ROLE

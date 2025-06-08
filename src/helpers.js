@@ -79,10 +79,11 @@ export async function getPackageJson(repoRoot) {
 /**
  * Reads the content of snippets from the given file paths.
  * @param {string[]} filePaths - The paths of the files to read.
+ * @param {string} repoRoot - The root directory of the repository.
  * @param {number} maxLines - The maximum number of lines to read from each file.
  * @returns {Promise<{path: string, snippet: string}[]}> - The snippets.
  */
-export async function getSnippets(filePaths, maxLines = 20) {
+export async function getSnippets(filePaths, repoRoot, maxLines = 20) {
 	const snippets = []
 	for (const p of filePaths.slice(0, 20)) {
 		const content = await fs.readFile(p, 'utf8')
