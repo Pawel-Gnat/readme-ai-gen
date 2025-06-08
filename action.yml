@@ -18,9 +18,10 @@ runs:
   using: 'composite'
   steps:
     - name: Scan files, update README.md
-      id: ai-readme-update
       shell: bash
-      run: node ${GITHUB_ACTION_PATH}/dist/index.cjs
+      run: |
+        cd "$GITHUB_WORKSPACE"
+        node "$GITHUB_ACTION_PATH/dist/index.cjs"
       env:
         GOOGLE_API_KEY: ${{ inputs.GOOGLE_API_KEY }}
         FILE_EXTENSIONS: ${{ inputs.FILE_EXTENSIONS }}

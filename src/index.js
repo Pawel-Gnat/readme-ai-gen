@@ -13,8 +13,10 @@ async function main() {
 		process.exit(1)
 	}
 
+	// Assume repository root is one level up from src
+	const repoRoot = process.env.GITHUB_WORKSPACE
 	// Assume README.md is located in the repository root (one level up from src)
-	const readmePath = path.join(__dirname, '..', 'README.md')
+	const readmePath = path.join(repoRoot, 'README.md')
 
 	let currentContent = ''
 	try {
@@ -28,8 +30,6 @@ async function main() {
 	const allowedExtensions = new Set(['.js', '.jsx', '.ts', '.tsx', '.md'])
 	const excludedDirs = new Set(['node_modules', '.git', 'dist'])
 
-	// Assume repository root is one level up from src
-	const repoRoot = path.join(__dirname, '..')
 	const filesFound = await findFilesRecursive(repoRoot, allowedExtensions, excludedDirs)
 	const relativeFiles = filesFound.map(filePath => path.relative(repoRoot, filePath))
 	const filesListStr = relativeFiles.join('\n')
@@ -80,8 +80,10 @@ async function main() {
 			await fs.writeFile(readmePath, updatedContent, 'utf8')
 			console.log('README.md has been successfully updated by script.')
 		} catch (err) {
-			console.error('Error writing updated README.md:', err)
-			process.exit(1)
+			if (err.code !== 'ENOENT') {
+				console.error('Error reading README.md:', err)
+				process.exit(1)
+			}
 		}
 	}
 }
