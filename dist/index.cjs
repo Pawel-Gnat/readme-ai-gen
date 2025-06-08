@@ -65980,8 +65980,8 @@ var require_main = __commonJS({ "node_modules/dotenv/lib/main.js"(exports, modul
 	const path$3 = require("path");
 	const os = require("os");
 	const crypto$1 = require("crypto");
-	const packageJson$1 = require_package();
-	const version = packageJson$1.version;
+	const packageJson = require_package();
+	const version = packageJson.version;
 	const LINE = /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/gm;
 	function parse(src) {
 		const obj = {};
@@ -66221,6 +66221,73 @@ async function findFilesRecursive(dir, allowedExtensions, excludedDirs) {
 	}
 	return filesFound;
 }
+/**
+
+* Reads the content of README.md file.
+
+* @param {string} repoRoot - The root directory of the repository.
+
+* @returns {Promise<string>} - The content of README.md file.
+
+*/
+async function getReadmeContent(repoRoot$1) {
+	const readmePath$1 = path.default.join(repoRoot$1, "README.md");
+	let currentContent = "";
+	try {
+		currentContent = await fs_promises.readFile(readmePath$1, "utf8");
+	} catch (err) {
+		if (err.code === "ENOENT") {
+			console.log("README.md not found - will create a new one.");
+			currentContent = "";
+		} else {
+			console.error("Error reading README.md:", err);
+			process.exit(1);
+		}
+	}
+	return currentContent;
+}
+/**
+
+* Reads the content of package.json file.
+
+* @param {string} repoRoot - The root directory of the repository.
+
+* @returns {Promise<string>} - The content of package.json file.
+
+*/
+async function getPackageJson(repoRoot$1) {
+	const packageJsonPath = path.default.join(repoRoot$1, "package.json");
+	try {
+		const packageJsonContent = await fs_promises.readFile(packageJsonPath, "utf8");
+		return packageJsonContent;
+	} catch (err) {
+		console.error("Error reading package.json:", err);
+		process.exit(1);
+	}
+}
+/**
+
+* Reads the content of snippets from the given file paths.
+
+* @param {string[]} filePaths - The paths of the files to read.
+
+* @param {number} maxLines - The maximum number of lines to read from each file.
+
+* @returns {Promise<{path: string, snippet: string}[]}> - The snippets.
+
+*/
+async function getSnippets(filePaths, maxLines = 20) {
+	const snippets = [];
+	for (const p of filePaths.slice(0, 20)) {
+		const content = await fs_promises.readFile(p, "utf8");
+		const lines = content.split("\n").slice(0, maxLines).join("\n");
+		snippets.push({
+			path: path.default.relative(repoRoot, p),
+			snippet: lines
+		});
+	}
+	return snippets;
+}
 
 //#endregion
 //#region src/index.js
@@ -66232,20 +66299,7 @@ async function main() {
 		console.error("GOOGLE_API_KEY is required.");
 		process.exit(1);
 	}
-	const repoRoot = process.env.GITHUB_WORKSPACE;
-	const readmePath = path.default.join(repoRoot, "README.md");
-	let currentContent = "";
-	try {
-		currentContent = await fs_promises.readFile(readmePath, "utf8");
-	} catch (err) {
-		if (err.code === "ENOENT") {
-			console.log("README.md not found - will create a new one.");
-			currentContent = "";
-		} else {
-			console.error("Error reading README.md:", err);
-			process.exit(1);
-		}
-	}
+	const repoRoot$1 = process.env.GITHUB_WORKSPACE;
 	const allowedExtensions = new Set([
 		".js",
 		".jsx",
@@ -66258,9 +66312,12 @@ async function main() {
 		".git",
 		"dist"
 	]);
-	const filesFound = await findFilesRecursive(repoRoot, allowedExtensions, excludedDirs);
-	const relativeFiles = filesFound.map((filePath) => path.default.relative(repoRoot, filePath));
+	const filesFound = await findFilesRecursive(repoRoot$1, allowedExtensions, excludedDirs);
+	const relativeFiles = filesFound.map((filePath) => path.default.relative(repoRoot$1, filePath));
 	const filesListStr = relativeFiles.join("\n");
+	const packageJson$1 = await getPackageJson(repoRoot$1);
+	const currentReadmeContent = await getReadmeContent(repoRoot$1);
+	const shortCodeSnippets = await getSnippets(relativeFiles);
 	const ai = new GoogleGenAI({ apiKey: googleApiKey });
 	const prompt = `
 	### ROLE
@@ -66268,8 +66325,9 @@ async function main() {
 
 	### CONTEXT
 	Repository file list: ${filesListStr}
-	Package.json file: ${packageJson}
-	README.md file, if exists: ${currentContent}
+	Package.json file: ${packageJson$1}
+	README.md file, if exists: ${currentReadmeContent}
+	Short code snippets: ${shortCodeSnippets.map((snippet) => `- ${snippet.path}\n${snippet.snippet}`).join("\n")}
 
 	### TASK
 	Create or update README.md in raw Markdown only (no code fences).
@@ -66285,8 +66343,8 @@ async function main() {
 	<List main technologies/frameworks inferred from file extensions and package.json>
 
 	## Key Repository Files
-	- \`path/file1.js\` – <1-line purpose>
-	- \`path/file2.tsx\` – <1-line purpose>
+	- \`path/file1.js\` - <1-line purpose>
+	- \`path/file2.tsx\` - <1-line purpose>
 
 	## Getting Started
 	<clone, install>
@@ -66321,7 +66379,7 @@ async function main() {
 		console.warn("AI did not return any content. Aborting update.");
 		process.exit(1);
 	}
-	if (updatedContent === currentContent) console.log("README.md is already up-to-date. No changes made.");
+	if (updatedContent === currentReadmeContent) console.log("README.md is already up-to-date. No changes made.");
 	else try {
 		await fs_promises.writeFile(readmePath, updatedContent, "utf8");
 		console.log("README.md has been successfully updated by script.");

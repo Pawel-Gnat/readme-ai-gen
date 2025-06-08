@@ -2,7 +2,7 @@ import { GoogleGenAI } from '@google/genai'
 import dotenv from 'dotenv'
 import * as fs from 'fs/promises'
 import path from 'path'
-import { findFilesRecursive } from './helpers'
+import { findFilesRecursive, getPackageJson, getReadmeContent, getSnippets } from './helpers'
 
 dotenv.config()
 
@@ -16,22 +16,6 @@ async function main() {
 	// Assume repository root is one level up from src
 	const repoRoot = process.env.GITHUB_WORKSPACE
 
-	// Assume README.md is located in the repository root (one level up from src)
-	const readmePath = path.join(repoRoot, 'README.md')
-
-	let currentContent = ''
-	try {
-		currentContent = await fs.readFile(readmePath, 'utf8')
-	} catch (err) {
-		if (err.code === 'ENOENT') {
-			console.log('README.md not found - will create a new one.')
-			currentContent = ''
-		} else {
-			console.error('Error reading README.md:', err)
-			process.exit(1)
-		}
-	}
-
 	// Define allowed file extensions and excluded directories
 	const allowedExtensions = new Set(['.js', '.jsx', '.ts', '.tsx', '.md'])
 	const excludedDirs = new Set(['node_modules', '.git', 'dist'])
@@ -39,6 +23,9 @@ async function main() {
 	const filesFound = await findFilesRecursive(repoRoot, allowedExtensions, excludedDirs)
 	const relativeFiles = filesFound.map(filePath => path.relative(repoRoot, filePath))
 	const filesListStr = relativeFiles.join('\n')
+	const packageJson = await getPackageJson(repoRoot)
+	const currentReadmeContent = await getReadmeContent(repoRoot)
+	const shortCodeSnippets = await getSnippets(relativeFiles)
 
 	// Prepare the prompt for AI to update README.md
 	const ai = new GoogleGenAI({ apiKey: googleApiKey })
@@ -49,7 +36,8 @@ async function main() {
 	### CONTEXT
 	Repository file list: ${filesListStr}
 	Package.json file: ${packageJson}
-	README.md file, if exists: ${currentContent}
+	README.md file, if exists: ${currentReadmeContent}
+	Short code snippets: ${shortCodeSnippets.map(snippet => `- ${snippet.path}\n${snippet.snippet}`).join('\n')}
 
 	### TASK
 	Create or update README.md in raw Markdown only (no code fences).
@@ -65,8 +53,8 @@ async function main() {
 	<List main technologies/frameworks inferred from file extensions and package.json>
 
 	## Key Repository Files
-	- \`path/file1.js\` – <1-line purpose>
-	- \`path/file2.tsx\` – <1-line purpose>
+	- \`path/file1.js\` - <1-line purpose>
+	- \`path/file2.tsx\` - <1-line purpose>
 
 	## Getting Started
 	<clone, install>
@@ -104,7 +92,7 @@ async function main() {
 		process.exit(1)
 	}
 
-	if (updatedContent === currentContent) {
+	if (updatedContent === currentReadmeContent) {
 		console.log('README.md is already up-to-date. No changes made.')
 	} else {
 		try {
