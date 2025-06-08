@@ -7,6 +7,7 @@ This GitHub Action scans your repository including files such as React, TypeScri
 The action analyzes your project's codebase to create comprehensive documentation. If a README does not exist, it generates one from scratch using a predefined structured format. If it does exist, the action updates it while preserving existing content below the updated sections. The generated README includes essential sections such as:
 
 - **Tech stack**: An overview of the technologies used in the project.
+- **Key repository files**: A list of key files in the project, which can be useful for developers who are new to the project or as a reference to AI model for future code improvements.
 - **Getting started**: Basic requirements and setup instructions.
 - **Setup**: Environment configuration and installation guidelines.
 - **Running the application**: Commands for development, building, and running the project.
@@ -92,6 +93,7 @@ jobs:
 The action scans your repository for source files (including React, TypeScript, JSX, TSX, Vitest, Playwright, and Storybook files), compiles a list of key files, and passes this information along with any existing README content to the AI model. The AI then generates a structured README based on standardized sections:
 
 - **Tech stack**
+- **Key repository files**
 - **Getting started**
 - **Setup**
 - **Running the application**

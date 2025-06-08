@@ -43,13 +43,14 @@ async function main() {
 
 	The README should include the following sections with appropriate details drawn from the project:
   	• Tech stack
+  	• Key repository files
   	• Getting started
   	• Setup
   	• Running the application
 
 	Additional requirements:
 	• Include a proper heading and an overview of the project.
-	• Additionally, include a section that lists key repository files (by relative path): ${filesListStr}
+	• Include a section that lists key repository files (by relative path): ${filesListStr}
 	• If there is existing README content, preserve the parts below the updated sections.
 
 	Current README content (if any): ${currentContent}`
