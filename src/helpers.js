@@ -35,12 +35,10 @@ export async function findFilesRecursive(dir, allowedExtensions, excludedDirs) {
 
 /**
  * Reads the content of README.md file.
- * @param {string} repoRoot - The root directory of the repository.
+ * @param {string} readmePath - The path to the README.md file.
  * @returns {Promise<string>} - The content of README.md file.
  */
-export async function getReadmeContent(repoRoot) {
-	// Assume README.md is located in the repository root (one level up from src)
-	const readmePath = path.join(repoRoot, 'README.md')
+export async function getReadmeContent(readmePath) {
 	let currentContent = ''
 
 	try {

@@ -66225,16 +66225,15 @@ async function findFilesRecursive(dir, allowedExtensions, excludedDirs) {
 
 * Reads the content of README.md file.
 
-* @param {string} repoRoot - The root directory of the repository.
+* @param {string} readmePath - The path to the README.md file.
 
 * @returns {Promise<string>} - The content of README.md file.
 
 */
-async function getReadmeContent(repoRoot) {
-	const readmePath$1 = path.default.join(repoRoot, "README.md");
+async function getReadmeContent(readmePath) {
 	let currentContent = "";
 	try {
-		currentContent = await fs_promises.readFile(readmePath$1, "utf8");
+		currentContent = await fs_promises.readFile(readmePath, "utf8");
 	} catch (err) {
 		if (err.code === "ENOENT") {
 			console.log("README.md not found - will create a new one.");
@@ -66302,6 +66301,7 @@ async function main() {
 		process.exit(1);
 	}
 	const repoRoot = process.env.GITHUB_WORKSPACE;
+	const readmePath = path.default.join(repoRoot, "README.md");
 	const allowedExtensions = new Set([
 		".js",
 		".jsx",
@@ -66318,7 +66318,7 @@ async function main() {
 	const relativeFiles = filesFound.map((filePath) => path.default.relative(repoRoot, filePath));
 	const filesListStr = relativeFiles.join("\n");
 	const packageJson$1 = await getPackageJson(repoRoot);
-	const currentReadmeContent = await getReadmeContent(repoRoot);
+	const currentReadmeContent = await getReadmeContent(readmePath);
 	const shortCodeSnippets = await getSnippets(relativeFiles, repoRoot);
 	const ai = new GoogleGenAI({ apiKey: googleApiKey });
 	const prompt = `

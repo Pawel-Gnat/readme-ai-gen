@@ -16,6 +16,9 @@ async function main() {
 	// Assume repository root is one level up from src
 	const repoRoot = process.env.GITHUB_WORKSPACE
 
+	// Assume README.md is located in the repository root (one level up from src)
+	const readmePath = path.join(repoRoot, 'README.md')
+
 	// Define allowed file extensions and excluded directories
 	const allowedExtensions = new Set(['.js', '.jsx', '.ts', '.tsx', '.md'])
 	const excludedDirs = new Set(['node_modules', '.git', 'dist'])
@@ -24,7 +27,7 @@ async function main() {
 	const relativeFiles = filesFound.map(filePath => path.relative(repoRoot, filePath))
 	const filesListStr = relativeFiles.join('\n')
 	const packageJson = await getPackageJson(repoRoot)
-	const currentReadmeContent = await getReadmeContent(repoRoot)
+	const currentReadmeContent = await getReadmeContent(readmePath)
 	const shortCodeSnippets = await getSnippets(relativeFiles, repoRoot)
 
 	// Prepare the prompt for AI to update README.md
