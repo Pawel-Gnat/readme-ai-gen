@@ -2,7 +2,7 @@ import { GoogleGenAI } from '@google/genai'
 import dotenv from 'dotenv'
 import * as fs from 'fs/promises'
 import path from 'path'
-import { findFilesRecursive, getPackageJson, getReadmeContent, getSnippets } from './helpers'
+import { findFilesRecursive, getPackageJson, getReadmeContent, getSnippetsByDir } from './helpers'
 
 dotenv.config()
 
@@ -28,7 +28,7 @@ async function main() {
 	const filesListStr = relativeFiles.join('\n')
 	const packageJson = await getPackageJson(repoRoot)
 	const currentReadmeContent = await getReadmeContent(readmePath)
-	const shortCodeSnippets = await getSnippets(relativeFiles, repoRoot)
+	const shortCodeSnippets = await getSnippetsByDir(relativeFiles, repoRoot)
 
 	// Prepare the prompt for AI to update README.md
 	const ai = new GoogleGenAI({ apiKey: googleApiKey })
@@ -71,6 +71,7 @@ async function main() {
 	### RULES
 	* Keep section order exactly as in OUTLINE.
 	* If a detail is unknown, write “TBD”.
+	* In section “Key Repository Files” list *every* file path you received (one per line). If the list is very long, group by top-level folder (e.g. \`src/\`, \`ui/\`, \`pages/\`, \`lib/\`, \`types/\`) and put a sub-heading for each group.
 	* If README.md exists, preserve the parts below the updated sections.
 	* If README.md exists, follow the existing format and structure.
 	* Output must be valid Markdown - no additional commentary.

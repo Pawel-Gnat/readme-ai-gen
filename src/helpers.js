@@ -79,14 +79,27 @@ export async function getPackageJson(repoRoot) {
  * @param {string[]} filePaths - The paths of the files to read.
  * @param {string} repoRoot - The root directory of the repository.
  * @param {number} maxLines - The maximum number of lines to read from each file.
+ * @param {number} perDir - The maximum number of files to read from each directory.
  * @returns {Promise<{path: string, snippet: string}[]}> - The snippets.
  */
-export async function getSnippets(filePaths, repoRoot, maxLines = 20) {
+export async function getSnippetsByDir(filePaths, repoRoot, maxLines = 20, perDir = 4) {
+	const byDir = new Map()
+
+	for (const rel of filePaths) {
+		const dir = rel.split(path.sep)[0]
+		if (!byDir.has(dir)) byDir.set(dir, [])
+		byDir.get(dir).push(rel)
+	}
+
 	const snippets = []
-	for (const p of filePaths.slice(0, 20)) {
-		const content = await fs.readFile(p, 'utf8')
-		const lines = content.split('\n').slice(0, maxLines).join('\n')
-		snippets.push({ path: path.relative(repoRoot, p), snippet: lines })
+	for (const [_dir, files] of byDir) {
+		for (const p of files.slice(0, perDir)) {
+			const content = await fs.readFile(path.join(repoRoot, p), 'utf8')
+			snippets.push({
+				path: p,
+				snippet: content.split('\n').slice(0, maxLines).join('\n'),
+			})
+		}
 	}
 	return snippets
 }

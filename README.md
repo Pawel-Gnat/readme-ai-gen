@@ -2,6 +2,8 @@
 
 This GitHub Action scans your repository including files such as React, TypeScript, JSX, TSX, Vitest, Playwright and Storybook, automatically generates or updates your project's README file using AI powered by Google GenAI.
 
+This tool is created for small projects. Attempting to use it in monorepo will result in incorrect result.
+
 ## Overview
 
 The action analyzes your project's codebase to create comprehensive documentation. If a README does not exist, it generates one from scratch using a predefined structured format. If it does exist, the action updates it while preserving existing content below the updated sections. The generated README includes essential sections such as:

@@ -66274,17 +66274,24 @@ async function getPackageJson(repoRoot) {
 
 * @param {number} maxLines - The maximum number of lines to read from each file.
 
+* @param {number} perDir - The maximum number of files to read from each directory.
+
 * @returns {Promise<{path: string, snippet: string}[]}> - The snippets.
 
 */
-async function getSnippets(filePaths, repoRoot, maxLines = 20) {
+async function getSnippetsByDir(filePaths, repoRoot, maxLines = 20, perDir = 4) {
+	const byDir = new Map();
+	for (const rel of filePaths) {
+		const dir = rel.split(path.default.sep)[0];
+		if (!byDir.has(dir)) byDir.set(dir, []);
+		byDir.get(dir).push(rel);
+	}
 	const snippets = [];
-	for (const p of filePaths.slice(0, 20)) {
-		const content = await fs_promises.readFile(p, "utf8");
-		const lines = content.split("\n").slice(0, maxLines).join("\n");
+	for (const [_dir, files] of byDir) for (const p of files.slice(0, perDir)) {
+		const content = await fs_promises.readFile(path.default.join(repoRoot, p), "utf8");
 		snippets.push({
-			path: path.default.relative(repoRoot, p),
-			snippet: lines
+			path: p,
+			snippet: content.split("\n").slice(0, maxLines).join("\n")
 		});
 	}
 	return snippets;
@@ -66319,7 +66326,7 @@ async function main() {
 	const filesListStr = relativeFiles.join("\n");
 	const packageJson$1 = await getPackageJson(repoRoot);
 	const currentReadmeContent = await getReadmeContent(readmePath);
-	const shortCodeSnippets = await getSnippets(relativeFiles, repoRoot);
+	const shortCodeSnippets = await getSnippetsByDir(relativeFiles, repoRoot);
 	const ai = new GoogleGenAI({ apiKey: googleApiKey });
 	const prompt = `
 	### ROLE
@@ -66360,6 +66367,7 @@ async function main() {
 	### RULES
 	* Keep section order exactly as in OUTLINE.
 	* If a detail is unknown, write “TBD”.
+	* In section “Key Repository Files” list *every* file path you received (one per line). If the list is very long, group by top-level folder (e.g. \`src/\`, \`ui/\`, \`pages/\`, \`lib/\`, \`types/\`) and put a sub-heading for each group.
 	* If README.md exists, preserve the parts below the updated sections.
 	* If README.md exists, follow the existing format and structure.
 	* Output must be valid Markdown - no additional commentary.
