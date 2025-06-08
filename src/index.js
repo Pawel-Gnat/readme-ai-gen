@@ -37,27 +37,25 @@ async function main() {
 	// Prepare the prompt for AI to update README.md
 	const ai = new GoogleGenAI({ apiKey: googleApiKey })
 	const prompt = `
-You are an experienced documentation writer and GitHub Actions expert.
-Your task is to update the project's README file in Markdown format. If a README does not exist, create it from scratch using the structured format outlined below. 
+	You are an experienced documentation writer and GitHub Actions expert.
+	Your task is to update the project's README file using raw Markdown syntax (do not wrap it in triple backticks or add "markdown" language specifier). If a README does not exist, create it from scratch using the structured format outlined below. 
 
-The README should include the following sections with appropriate details drawn from the project:
-  • Tech stack
-  • Getting started
-  • Setup
-  • Running the application
+	The README should include the following sections with appropriate details drawn from the project:
+  	• Tech stack
+  	• Getting started
+  	• Setup
+  	• Running the application
 
-Additional requirements:
- - Include a proper heading and an overview of the project.
- - Additionally, include a section that lists key repository files (by relative path):
-${filesListStr}
+	Additional requirements:
+	• Include a proper heading and an overview of the project.
+	• Additionally, include a section that lists key repository files (by relative path):${filesListStr}
 
-If there is existing README content, preserve the parts below the updated sections.
+	• If there is existing README content, preserve the parts below the updated sections.
+	• Do not include any other text or comments in the README file.
 
-Current README content (if any):
-${currentContent}
-`
+	Current README content (if any):${currentContent}`
 
-	console.log('Generating updated README content via AI (v2)...')
+	console.log('Generating updated README content via AI...')
 	let response
 	try {
 		response = await ai.models.generateContent({
