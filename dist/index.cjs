@@ -66238,8 +66238,13 @@ async function main() {
 	try {
 		currentContent = await fs_promises.readFile(readmePath, "utf8");
 	} catch (err) {
-		console.error("Error reading README.md:", err);
-		process.exit(1);
+		if (err.code === "ENOENT") {
+			console.log("README.md not found - will create a new one.");
+			currentContent = "";
+		} else {
+			console.error("Error reading README.md:", err);
+			process.exit(1);
+		}
 	}
 	const allowedExtensions = new Set([
 		".js",
