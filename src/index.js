@@ -21,7 +21,7 @@ async function main() {
 
 	// Define allowed file extensions and excluded directories
 	const allowedExtensions = new Set(['.js', '.jsx', '.ts', '.tsx', '.md'])
-	const excludedDirs = new Set(['node_modules', '.git', 'dist'])
+	const excludedDirs = new Set(['node_modules', '.git', 'dist', '.next', 'build', 'public', 'static'])
 
 	const filesFound = await findFilesRecursive(repoRoot, allowedExtensions, excludedDirs)
 	const relativeFiles = filesFound.map(filePath => path.relative(repoRoot, filePath))

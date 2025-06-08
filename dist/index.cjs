@@ -66319,7 +66319,11 @@ async function main() {
 	const excludedDirs = new Set([
 		"node_modules",
 		".git",
-		"dist"
+		"dist",
+		".next",
+		"build",
+		"public",
+		"static"
 	]);
 	const filesFound = await findFilesRecursive(repoRoot, allowedExtensions, excludedDirs);
 	const relativeFiles = filesFound.map((filePath) => path.default.relative(repoRoot, filePath));
