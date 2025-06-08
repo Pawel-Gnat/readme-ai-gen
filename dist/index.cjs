@@ -65980,8 +65980,8 @@ var require_main = __commonJS({ "node_modules/dotenv/lib/main.js"(exports, modul
 	const path$3 = require("path");
 	const os = require("os");
 	const crypto$1 = require("crypto");
-	const packageJson = require_package();
-	const version = packageJson.version;
+	const packageJson$1 = require_package();
+	const version = packageJson$1.version;
 	const LINE = /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/gm;
 	function parse(src) {
 		const obj = {};
@@ -66263,22 +66263,48 @@ async function main() {
 	const filesListStr = relativeFiles.join("\n");
 	const ai = new GoogleGenAI({ apiKey: googleApiKey });
 	const prompt = `
-	You are an experienced developer tasked to write documentation for a project.
-	Your task is to update the project's README file using raw Markdown syntax (do not wrap it in triple backticks or add "markdown" language specifier). If a README does not exist, create it from scratch using the structured format outlined below. 
+	### ROLE
+	You are a senior JavaScript developer and expert technical writer.
 
-	The README should include the following sections with appropriate details drawn from the project:
-  	• Tech stack
-  	• Key repository files
-  	• Getting started
-  	• Setup
-  	• Running the application
+	### CONTEXT
+	Repository file list: ${filesListStr}
+	Package.json file: ${packageJson}
+	README.md file, if exists: ${currentContent}
 
-	Additional requirements:
-	• Include a proper heading and an overview of the project.
-	• Include a section that lists key repository files (by relative path): ${filesListStr}
-	• If there is existing README content, preserve the parts below the updated sections.
+	### TASK
+	Create or update README.md in raw Markdown only (no code fences).
+	Follow exactly the outline below and replace angle-bracket placeholders <> with real content.
 
-	Current README content (if any): ${currentContent}`;
+	### OUTLINE
+	# <Project Title>
+
+	## Overview
+	<2-4 sentence project summary>
+
+	## Tech Stack
+	<List main technologies/frameworks inferred from file extensions and package.json>
+
+	## Key Repository Files
+	- \`path/file1.js\` – <1-line purpose>
+	- \`path/file2.tsx\` – <1-line purpose>
+
+	## Getting Started
+	<clone, install>
+
+	## Setup
+	<env vars, config>
+
+	## Running the application
+	<dev server, prod build, tests>
+
+	### RULES
+	* Keep section order exactly as in OUTLINE.
+	* If a detail is unknown, write “TBD”.
+	* If README.md exists, preserve the parts below the updated sections.
+	* If README.md exists, follow the existing format and structure.
+	* Output must be valid Markdown - no additional commentary.
+	* Do not include any additional commentary or explanation.
+	`;
 	console.log("Generating updated README content via AI...");
 	let response;
 	try {
